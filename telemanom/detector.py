@@ -193,11 +193,12 @@ class Detector:
         """
         Initiate processing for all channels.
         """
-        for i, row in self.chan_df.iterrows():
-            logger.info('Stream # {}: {}'.format(i+1, row.chan_id))
-            channel = Channel(self.config, row.chan_id)
+        m = ["machine-1-1","machine-1-2","machine-1-3","machine-1-4","machine-1-5","machine-1-6","machine-1-7","machine-1-8","machine-2-1","machine-2-2","machine-2-3","machine-2-4","machine-2-5","machine-2-6","machine-2-7","machine-2-8","machine-2-9","machine-3-1","machine-3-2","machine-3-3","machine-3-4","machine-3-5","machine-3-6","machine-3-7","machine-3-8","machine-3-9","machine-3-10","machine-3-11", "swat", "wadi"]
+        for i in m:
+            logger.info('Stream # {}'.format(i))
+            channel = Channel(self.config, i)
             channel.load_data()
-
+            
             if self.config.predict:
                 model = Model(self.config, self.id, channel)
                 channel = model.batch_predict(channel)
@@ -209,47 +210,65 @@ class Detector:
             errors = Errors(channel, self.config, self.id)
             errors.process_batches(channel)
 
-            result_row = {
-                'run_id': self.id,
-                'chan_id': row.chan_id,
-                'num_train_values': len(channel.X_train),
-                'num_test_values': len(channel.X_test),
-                'n_predicted_anoms': len(errors.E_seq),
-                'normalized_pred_error': errors.normalized,
-                'anom_scores': errors.anom_scores
-            }
+            
+            
+        # for i, row in self.chan_df.iterrows():
+        #     logger.info('Stream # {}: {}'.format(i+1, row.chan_id))
+        #     channel = Channel(self.config, row.chan_id)
+        #     channel.load_data()
 
-            if self.labels_path:
-                result_row = {**result_row,
-                              **self.evaluate_sequences(errors, row)}
-                result_row['spacecraft'] = row['spacecraft']
-                result_row['anomaly_sequences'] = row['anomaly_sequences']
-                result_row['class'] = row['class']
-                self.results.append(result_row)
+        #     if self.config.predict:
+        #         model = Model(self.config, self.id, channel)
+        #         channel = model.batch_predict(channel)
+        #     else:
+        #         channel.y_hat = np.load(os.path.join('data', self.id, 'y_hat',
+        #                                              '{}.npy'
+        #                                              .format(channel.id)))
 
-                logger.info('Total true positives: {}'
-                            .format(self.result_tracker['true_positives']))
-                logger.info('Total false positives: {}'
-                            .format(self.result_tracker['false_positives']))
-                logger.info('Total false negatives: {}\n'
-                            .format(self.result_tracker['false_negatives']))
+        #     errors = Errors(channel, self.config, self.id)
+        #     errors.process_batches(channel)
 
-            else:
-                result_row['anomaly_sequences'] = errors.E_seq
-                self.results.append(result_row)
+        #     result_row = {
+        #         'run_id': self.id,
+        #         'chan_id': row.chan_id,
+        #         'num_train_values': len(channel.X_train),
+        #         'num_test_values': len(channel.X_test),
+        #         'n_predicted_anoms': len(errors.E_seq),
+        #         'normalized_pred_error': errors.normalized,
+        #         'anom_scores': errors.anom_scores
+        #     }
 
-                logger.info('{} anomalies found'
-                            .format(result_row['n_predicted_anoms']))
-                logger.info('anomaly sequences start/end indices: {}'
-                            .format(result_row['anomaly_sequences']))
-                logger.info('number of test values: {}'
-                            .format(result_row['num_test_values']))
-                logger.info('anomaly scores: {}\n'
-                            .format(result_row['anom_scores']))
+        #     if self.labels_path:
+        #         result_row = {**result_row,
+        #                       **self.evaluate_sequences(errors, row)}
+        #         result_row['spacecraft'] = row['spacecraft']
+        #         result_row['anomaly_sequences'] = row['anomaly_sequences']
+        #         result_row['class'] = row['class']
+        #         self.results.append(result_row)
 
-            self.result_df = pd.DataFrame(self.results)
-            self.result_df.to_csv(
-                os.path.join(self.result_path, '{}.csv'.format(self.id)),
-                index=False)
+        #         logger.info('Total true positives: {}'
+        #                     .format(self.result_tracker['true_positives']))
+        #         logger.info('Total false positives: {}'
+        #                     .format(self.result_tracker['false_positives']))
+        #         logger.info('Total false negatives: {}\n'
+        #                     .format(self.result_tracker['false_negatives']))
 
-        self.log_final_stats()
+        #     else:
+        #         result_row['anomaly_sequences'] = errors.E_seq
+        #         self.results.append(result_row)
+
+        #         logger.info('{} anomalies found'
+        #                     .format(result_row['n_predicted_anoms']))
+        #         logger.info('anomaly sequences start/end indices: {}'
+        #                     .format(result_row['anomaly_sequences']))
+        #         logger.info('number of test values: {}'
+        #                     .format(result_row['num_test_values']))
+        #         logger.info('anomaly scores: {}\n'
+        #                     .format(result_row['anom_scores']))
+
+        #     self.result_df = pd.DataFrame(self.results)
+        #     self.result_df.to_csv(
+        #         os.path.join(self.result_path, '{}.csv'.format(self.id)),
+        #         index=False)
+
+        # self.log_final_stats()
