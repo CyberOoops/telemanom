@@ -175,7 +175,7 @@ class Model:
 
         channel.y_hat = self.y_hat
 
-        np.save(os.path.join('data', self.run_id, 'y_hat', '{}.npy'
+        np.save(os.path.join('data', self.id, 'y_hat', '{}.npy'
                              .format(self.chan_id)), self.y_hat)
 
         return channel
